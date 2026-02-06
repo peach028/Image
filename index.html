@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/images/favicon.png">
+    <title>图片API接口文档</title>
+    <!-- ============== 核心配置区【最顶部，方便修改】 ============== -->
+    <script>
+        // 图片API主接口地址【直接修改这里即可】
+        const API_BASE_URL = 'http://pt.tzjsy.cn/4k/img.php';
+        // 必应背景图接口地址【已修改为新地址】
+        const BING_API_URL = 'http://pt.tzjsy.cn/bing/img.php';
+    </script>
+</head>
+<body>
+    <!-- ============== HTML主程序结构【中间核心区域】 ============== -->
+    <div id="snow-container"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>图片API接口文档</h1>
+            <p>随机图片获取服务 · 高效稳定 · 多场景适配</p>
+        </div>
+
+        <div class="main-row">
+            <!-- 左侧接口说明 -->
+            <div class="left-content">
+                <div class="content">
+                    <div class="section">
+                        <h2>接口概览</h2>
+                        <div class="api-info">
+                            <div class="api-item">
+                                <strong>请求方式:</strong>
+                                <span class="method-get">GET</span>
+                            </div>
+                            <div class="api-item">
+                                <strong>返回格式:</strong>
+                                <span class="format-json">JSON/图片流</span>
+                            </div>
+                            <div class="api-item">
+                                <strong>接口地址:</strong>
+                                <span class="clickable-link" id="apiMainLink"></span>
+                            </div>
+                            <div class="api-item">
+                                <strong>状态码:</strong>
+                                <span>200</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>返回参数说明</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>参数名</th>
+                                    <th>类型</th>
+                                    <th>描述</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>code</td>
+                                    <td>Number</td>
+                                    <td>200成功 / 404失败</td>
+                                </tr>
+                                <tr>
+                                    <td>msg</td>
+                                    <td>String</td>
+                                    <td>状态描述信息</td>
+                                </tr>
+                                <tr>
+                                    <td>data</td>
+                                    <td>String</td>
+                                    <td>图片有效访问地址</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="section">
+                        <h2>返回示例</h2>
+                        <div class="response-example">
+                            <h3>成功返回：</h3>
+                            <pre id="successResponse">{
+  "code": <span id="realCode">200</span>,
+  "msg": "<span id="realMsg">请求成功</span>",
+  "data": "<span class="clickable-link" id="realImageLink"></span>"
+}</pre>
+                        </div>
+                        <div class="response-example error">
+                            <h3>失败返回：</h3>
+                            <pre>{
+  "code": 404,
+  "msg": "未找到图片文件。",
+  "data": null
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧预览+功能 -->
+            <div class="right-section">
+                <div class="image-preview-container">
+                    <h3 class="image-preview-title">接口实时预览（点击刷新）</h3>
+                    <div class="image-frame" id="imageFrame">
+                        <div class="loading">正在加载图片...</div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>✅ 随机无重复</h3>
+                        <p>从指定文件夹随机返回，避免连续重复</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔒 会话控制</h3>
+                        <p>Session记录上一张，防止重复显示</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🌐 双格式返回</h3>
+                        <p>浏览器→图片流，接口→JSON，多场景适配</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📱 动态地址</h3>
+                        <p>自动提取域名+子目录，部署免改配置</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部备案信息 -->
+    <div class="footer-record">
+      <a href="https://beian.miit.gov.cn/" target="_blank" style="text-decoration:none;" rel="noopener">
+        <img src="/images/icp.png" style="width:15px;height:15px;vertical-align:middle;margin-right:6px;">
+        <span style="color:#222; font-size:14px; font-weight:500; vertical-align:middle;">沪ICP备00000001号</span>
+      </a>
+      <a href="https://beian.mps.gov.cn/#/query/webSearch?code=自己的备案id" target="_blank" style="text-decoration:none;" rel="noopener">
+        <img src="/images/beian.png" style="width:15px;height:15px;vertical-align:middle;margin-right:6px;">
+        <span style="color:#222; font-size:14px; font-weight:500; vertical-align:middle;">沪公网安备00000000000001号</span>
+      </a>
+    </div>
+
+    <!-- ============== 所有CSS样式【移到HTML下方，备案上方】 ============== -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Microsoft YaHei',sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: transparent;
+            min-height: 100vh;
+            padding: 8px;
+            background-position: center;
+            background-size: cover;
+            background-attachment: fixed;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.7);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* 飘雪动画 */
+        #snow-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .snowflake {
+            position: absolute;
+            color: #fff;
+            font-size: 16px;
+            opacity: 0;
+            animation: snowfall linear infinite;
+            text-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        @keyframes snowfall {
+            0%   { transform: translate(0,0) rotate(0deg); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translate(50px, 100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* 主容器样式 */
+        .container {
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255,255,255, 0.22);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            padding: 8px;
+            margin-bottom: 12px;
+            flex: 1;
+        }
+
+        /* 顶部标题栏 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 16px 12px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .header h1 { font-size: 1.9em; margin-bottom: 6px; font-weight: 600; }
+        .header p { font-size: 1em; opacity: 0.95; }
+
+        /* 左右分栏布局 */
+        .main-row {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .left-content {
+            flex: 0 0 43%;
+            min-width: 320px;
+        }
+        .right-section {
+            flex: 1;
+            min-width: 420px;
+            position: sticky;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* 内容通用样式 */
+        .content { padding: 12px 10px; }
+        .section { margin-bottom: 18px; }
+        .section h2 {
+            color: #556cd6;
+            border-bottom: 2px solid rgba(238,238,238,0.8);
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+            font-size: 1.4em;
+        }
+
+        /* 接口信息卡片 */
+        .api-info {
+            background: rgba(255,255,255,0.65);
+            padding: 14px;
+            border-radius: 6px;
+        }
+        .api-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(233,236,239,0.7);
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+        .api-item strong { width: 110px; color: #222; }
+        .method-get { background: #d4edda; color: #155724; padding: 3px 7px; border-radius: 3px; font-size: 0.9em; }
+        .format-json { background: #cce5ff; color: #004085; padding: 3px 7px; border-radius: 3px; font-size: 0.9em; }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid rgba(221,221,221,0.7);
+            padding: 9px 10px;
+            text-align: left;
+        }
+        th { background: rgba(248,249,250,0.7); }
+
+        /* 返回示例样式 */
+        .response-example {
+            background: rgba(255,255,255,0.6);
+            padding: 14px;
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+            margin-bottom: 12px;
+        }
+        .response-example h3 { margin-bottom: 8px; font-size: 1.1em; }
+        pre {
+            background: rgba(248,249,250,0.8);
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .response-example.error {
+            border-left-color: #dc3545;
+            background: rgba(248,215,218,0.6);
+        }
+        .response-example.error pre { background: rgba(248,215,218,0.7); }
+
+        /* 可点击链接样式 */
+        .clickable-link {
+            color: #0066cc;
+            font-weight: bold;
+            word-break: break-all;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .clickable-link:hover { color: #004c99; text-decoration: none; }
+
+        /* 图片预览容器 */
+        .image-preview-container {
+            background: rgba(255,255,255,0.65);
+            padding: 18px;
+            border-radius: 8px;
+            border: 1px solid rgba(221,221,221,0.7);
+        }
+        .image-preview-title {
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            color: #222;
+            font-weight: 500;
+        }
+        .image-frame {
+            width: 100%;
+            height: 500px;
+            border: 1px solid rgba(221,221,221,0.7);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        .chrome-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .loading { text-align: center; padding: 20px; color: #444; font-size: 0.95em; }
+        .error-message { color: #c82333; text-align: center; padding: 20px; line-height: 1.7; font-size: 0.95em; }
+
+        /* 功能特性卡片 */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            background: rgba(255,255,255,0.65);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(221,221,221,0.7);
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.8);
+            padding: 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(233,236,239,0.7);
+        }
+        .feature-card h3 {
+            color: #556cd6;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .feature-card p { 
+            font-size: 0.95em;
+            line-height: 1.5; 
+            color: #333;
+        }
+
+        /* 底部备案容器 */
+        .footer-record {
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto 12px;
+            background: rgba(255,255,255,0.65);
+            border-radius: 8px;
+            padding: 14px 20px;
+            text-align: center;
+            border: 1px solid rgba(221,221,221,0.7);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+
+        /* 自适应媒体查询 - 全设备兼容 */
+        @media (max-width: 1100px) {
+            .left-content  { flex: 0 0 42%; }
+            .right-section { min-width: 380px; }
+            .image-frame { height: 470px; }
+        }
+        @media (max-width: 920px) {
+            .left-content  { flex: 0 0 40%; }
+            .right-section { min-width: 350px; }
+            .image-frame { height: 440px; }
+        }
+        @media (max-width: 768px) {
+            .main-row { flex-direction: column; gap: 20px; }
+            .left-content, .right-section { flex: 0 0 100%; min-width: auto; width: 100%; }
+            .right-section { position: static; gap: 16px; }
+            .image-frame { height: 360px; }
+            .snowflake { font-size: 10px; }
+            .features { grid-template-columns: 1fr 1fr; }
+            .footer-record { gap: 16px; padding: 12px 14px; }
+        }
+        @media (max-width: 480px) {
+            .features { grid-template-columns: 1fr; }
+            .image-frame { height: 300px; }
+            .footer-record { flex-direction: column; gap: 10px; padding: 12px 10px; }
+        }
+    </style>
+
+    <!-- ============== 所有JS脚本【移到页面最底部，最后加载】 ============== -->
+    <script>
+        // 直接复用顶部全局配置变量，无重复定义
+        const apiMainLink    = document.getElementById('apiMainLink');
+        const realCode       = document.getElementById('realCode');
+        const realMsg        = document.getElementById('realMsg');
+        const realImageLink  = document.getElementById('realImageLink');
+        const imageFrame     = document.getElementById('imageFrame');
+
+        // 页面加载完成后执行初始化
+        window.addEventListener('DOMContentLoaded', async () => {
+            await setBingBackground();
+            await setAllDynamicUrl();
+            loadPreviewImage();
+            startSnowfall();
+        });
+
+        // 预览图点击刷新
+        imageFrame.onclick = loadPreviewImage;
+
+        // 接口地址链接新窗口打开
+        apiMainLink.onclick = realImageLink.onclick = (e) => {
+            if (!e.target.innerText) return;
+            window.open(e.target.innerText, '_blank');
+        };
+
+        // 设置必应背景图 - 适配新接口（自动判断返回类型）
+        async function setBingBackground() {
+            try {
+                // 先尝试以图片方式加载（新接口可能直接返回图片流）
+                const img = new Image();
+                img.src = `${BING_API_URL}?t=${+new Date()}`; // 时间戳防缓存
+                
+                img.onload = () => {
+                    document.body.style.backgroundImage = `url(${img.src})`;
+                };
+                
+                img.onerror = async () => {
+                    // 如果图片加载失败，尝试以JSON方式请求
+                    try {
+                        const response = await fetch(`${BING_API_URL}?t=${+new Date()}`);
+                        // 判断响应类型
+                        const contentType = response.headers.get('content-type');
+                        
+                        if (contentType && contentType.includes('json')) {
+                            const data = await response.json();
+                            const imgUrl = data.imgurl || data.url || data.data;
+                            if (imgUrl) {
+                                document.body.style.backgroundImage = `url(${imgUrl})`;
+                            } else {
+                                throw new Error('未获取到图片地址');
+                            }
+                        } else {
+                            // 如果是其他类型，直接作为图片地址使用
+                            const blobUrl = URL.createObjectURL(await response.blob());
+                            document.body.style.backgroundImage = `url(${blobUrl})`;
+                        }
+                    } catch (e) {
+                        // 所有方式都失败时使用渐变背景兜底
+                        document.body.style.background = 'linear-gradient(135deg, #f5f7fa, #c3cfe2)';
+                    }
+                };
+            } catch (e) {
+                document.body.style.background = 'linear-gradient(135deg, #f5f7fa, #c3cfe2)';
+            }
+        }
+
+        // 动态获取并设置接口地址
+        async function setAllDynamicUrl() {
+            try {
+                const realUrl = await getBrowserRealImageUrl();
+                const u = new URL(realUrl);
+                const parts = u.pathname.split('/').filter(p=>p);
+                const base = parts[0] ? `${u.origin}/${parts[0]}` : u.origin;
+                const final = `${base}/img.php`;
+                apiMainLink.innerText = final;
+                realImageLink.innerText = final;
+            } catch (e) {
+                apiMainLink.innerText = API_BASE_URL;
+                realImageLink.innerText = API_BASE_URL;
+            }
+        }
+
+        // 获取浏览器端真实图片接口地址
+        function getBrowserRealImageUrl() {
+            return new Promise((res, rej) => {
+                const img = new Image();
+                img.src = `${API_BASE_URL}?t=${+new Date()}`;
+                img.onload = () => res(img.src);
+                img.onerror = rej;
+                setTimeout(() => rej('timeout'), 5000);
+            });
+        }
+
+        // 加载/刷新预览图片
+        function loadPreviewImage() {
+            imageFrame.innerHTML = '<div class="loading">加载中...</div>';
+            const img = new Image();
+            img.className = 'chrome-image';
+            img.src = `${API_BASE_URL}?t=${+new Date()}`; // 时间戳防缓存
+            img.onload = () => {
+                imageFrame.innerHTML = '';
+                imageFrame.appendChild(img);
+            };
+            img.onerror = () => {
+                imageFrame.innerHTML = `<div class="error-message">预览加载失败<br>检查接口/网络/CORS</div>`;
+            };
+        }
+
+        // 飘雪动画初始化
+        function startSnowfall() {
+            const container = document.getElementById('snow-container');
+            const count = innerWidth > 768 ? 80 : 40;
+            const chars = ['🌙','❅','❆','⭐','❤️'];
+            for(let i=0; i<count; i++){
+                const s = document.createElement('div');
+                s.className = 'snowflake';
+                s.innerText = chars[Math.random()*chars.length|0];
+                s.style.left = Math.random()*100+'%';
+                s.style.top = (Math.random()*-50-10)+'px';
+                s.style.animationDuration = (Math.random()*12+6)+'s';
+                s.style.animationDelay = (Math.random()*10)+'s';
+                s.style.transform = `scale(${Math.random()*0.7+0.4})`;
+                container.appendChild(s);
+            }
+        }
+    </script>
+</body>
+</html>
